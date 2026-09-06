@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>17 Cookup — Conectar TikTok</title>
+<style>
+  body{margin:0;font:16px/1.6 -apple-system,Helvetica,Arial,sans-serif;background:#0e0e10;color:#eee;
+       display:flex;min-height:100vh;align-items:center;justify-content:center}
+  .card{max-width:520px;padding:32px;text-align:center}
+  h1{font-size:20px}
+  code{display:block;background:#17171b;border:1px solid #2a2a31;border-radius:10px;padding:16px;
+       margin:16px 0;word-break:break-all;color:#ff9a4a;font-size:14px}
+  button{background:#ff7a1a;color:#111;border:0;border-radius:8px;padding:12px 20px;font-size:15px;
+         font-weight:700;cursor:pointer}
+  .ok{color:#3ddc84;margin-top:10px;min-height:20px}
+  .mut{color:#9a9aa5;font-size:14px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Conexión con TikTok</h1>
+  <p class="mut" id="msg">Leyendo el código de autorización…</p>
+  <code id="code">—</code>
+  <button id="copy">Copiar código</button>
+  <p class="ok" id="ok"></p>
+  <p class="mut">Copia este código y pégalo donde te lo pida el editor (17 Cookup).</p>
+</div>
+<script>
+  const p = new URLSearchParams(location.search);
+  const code = p.get('code');
+  const err = p.get('error');
+  const el = document.getElementById('code');
+  const msg = document.getElementById('msg');
+  if (code) { el.textContent = code; msg.textContent = 'Tu código de autorización:'; }
+  else if (err) { el.textContent = err + (p.get('error_description') ? (' — ' + p.get('error_description')) : ''); msg.textContent = 'Hubo un error:'; }
+  else { el.textContent = 'No se recibió ningún código.'; msg.textContent = ''; }
+  document.getElementById('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText(code || ''); document.getElementById('ok').textContent = 'Copiado ✓'; }
+    catch(e){ document.getElementById('ok').textContent = 'Selecciona el código y cópialo a mano.'; }
+  };
+</script>
+</body>
+</html>
