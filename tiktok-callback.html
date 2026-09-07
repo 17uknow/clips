@@ -7,38 +7,41 @@
 <style>
   body{margin:0;font:16px/1.6 -apple-system,Helvetica,Arial,sans-serif;background:#0e0e10;color:#eee;
        display:flex;min-height:100vh;align-items:center;justify-content:center}
-  .card{max-width:640px;padding:32px}
-  h1{font-size:20px;text-align:center}
-  .lbl{color:#9a9aa5;font-size:13px;margin-top:16px}
+  .card{max-width:560px;padding:32px;text-align:center}
+  h1{font-size:20px}
   code{display:block;background:#17171b;border:1px solid #2a2a31;border-radius:10px;padding:14px;
-       margin:6px 0;word-break:break-all;color:#ff9a4a;font-size:13px}
-  button{background:#ff7a1a;color:#111;border:0;border-radius:8px;padding:12px 20px;font-size:15px;
-         font-weight:700;cursor:pointer;margin-top:8px}
-  .ok{color:#3ddc84;margin-top:8px;min-height:20px}
-  .mut{color:#9a9aa5;font-size:14px;text-align:center}
+       margin:12px 0;word-break:break-all;color:#ff9a4a;font-size:13px}
+  .mut{color:#9a9aa5;font-size:14px}
+  a{color:#ff7a1a;font-weight:700}
 </style>
 </head>
 <body>
 <div class="card">
-  <h1>Conexión con TikTok</h1>
-  <div class="lbl">TU CÓDIGO (cópialo y pégalo en el editor / chat):</div>
-  <code id="code">—</code>
-  <button id="copy">Copiar código</button>
-  <p class="ok" id="ok"></p>
-  <div class="lbl">Diagnóstico (por si el código falla, copia también esto):</div>
-  <code id="raw">—</code>
+  <h1>Conectando TikTok…</h1>
+  <p class="mut" id="msg">Enviando el código al editor…</p>
+  <div id="fallback" style="display:none">
+    <p class="mut">Si no se conecta solo, copia este código y pégalo en el editor:</p>
+    <code id="code">—</code>
+  </div>
 </div>
 <script>
-  const search = location.search;
-  const params = new URLSearchParams(search);
+  const params = new URLSearchParams(location.search);
   const code = params.get('code') || '';
   const err = params.get('error');
-  document.getElementById('code').textContent = err ? ('ERROR: ' + err + ' — ' + (params.get('error_description')||'')) : (code || 'No se recibió código');
-  document.getElementById('raw').textContent = 'search=' + search;
-  document.getElementById('copy').onclick = async () => {
-    try { await navigator.clipboard.writeText(code); document.getElementById('ok').textContent = 'Copiado ✓'; }
-    catch(e){ document.getElementById('ok').textContent = 'Selecciónalo y cópialo a mano.'; }
-  };
+  if (err) {
+    document.getElementById('msg').textContent = 'Error de TikTok: ' + err + ' — ' + (params.get('error_description')||'');
+  } else if (code) {
+    // Rebota el código al servidor local (intercambio instantáneo, sin copiar/pegar)
+    location.href = 'http://localhost:8765/tiktok/callback?code=' + encodeURIComponent(code);
+    // Fallback por si el editor no está encendido
+    setTimeout(() => {
+      document.getElementById('msg').textContent = '¿No se conectó?';
+      document.getElementById('fallback').style.display = 'block';
+      document.getElementById('code').textContent = code;
+    }, 2500);
+  } else {
+    document.getElementById('msg').textContent = 'No se recibió ningún código.';
+  }
 </script>
 </body>
 </html>
